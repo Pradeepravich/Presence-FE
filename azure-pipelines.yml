@@ -1,0 +1,105 @@
+trigger:
+  - development
+  - qa
+
+variables:
+  workingDirectory: "$(System.DefaultWorkingDirectory)"
+
+stages:
+  - stage: Build
+    jobs:
+      - job: Build
+        pool:
+          vmImage: ubuntu-latest
+        steps:
+          - task: NodeTool@0
+            inputs:
+              versionSpec: "20.x"
+            displayName: "Install Node.js"
+
+          - script: |
+              npm install
+              if [ "$(Build.SourceBranchName)" = "development" ]; then
+                npm run build:dev
+              elif [ "$(Build.SourceBranchName)" = "qa" ]; then
+                npm run build:qa
+              else
+                npm run build
+              fi
+            workingDirectory: $(workingDirectory)
+            displayName: "Install dependencies and build based on branch"
+
+          - task: ArchiveFiles@2
+            inputs:
+              rootFolderOrFile: "$(workingDirectory)/dist"
+              includeRootFolder: false
+              archiveType: "zip"
+              archiveFile: "$(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip"
+              replaceExistingArchive: true
+              verbose: true
+            displayName: "Archive build files"
+
+          - task: PublishBuildArtifacts@1
+            inputs:
+              PathtoPublish: "$(Build.ArtifactStagingDirectory)"
+              ArtifactName: "drop"
+              publishLocation: "Container"
+            displayName: "Publish artifacts"
+
+  - stage: Deploy
+    dependsOn: Build
+    condition: |
+      and
+      (
+        succeeded(),
+        eq(variables['Build.SourceBranchName'], 'development')
+      )
+    jobs:
+      - job: Deploy
+        pool:
+          vmImage: ubuntu-latest
+        steps:
+          - task: DownloadBuildArtifacts@0
+            inputs:
+              buildType: "current"
+              downloadType: "single"
+              artifactName: "drop"
+              downloadPath: "$(System.ArtifactsDirectory)"
+            displayName: "Download Build Artifacts"
+
+          - task: AzureWebApp@1
+            displayName: "Deploy to Azure Web App"
+            inputs:
+              azureSubscription: "AzureDevops"
+              appName: "presence-dev"
+              appType: "webApp"
+              package: "$(System.ArtifactsDirectory)/drop/$(Build.BuildId).zip"
+
+  - stage: DeployQA
+    dependsOn: Build
+    condition: |
+      and
+      (
+        succeeded(),
+        eq(variables['Build.SourceBranchName'], 'qa')
+      )
+    jobs:
+      - job: Deploy
+        pool:
+          vmImage: ubuntu-latest
+        steps:
+          - task: DownloadBuildArtifacts@0
+            inputs:
+              buildType: "current"
+              downloadType: "single"
+              artifactName: "drop"
+              downloadPath: "$(System.ArtifactsDirectory)"
+            displayName: "Download Build Artifacts"
+
+          - task: AzureWebApp@1
+            displayName: "Deploy to Azure Web App"
+            inputs:
+              azureSubscription: "AzureDevops"
+              appName: "presence-qa"
+              appType: "webApp"
+              package: "$(System.ArtifactsDirectory)/drop/$(Build.BuildId).zip"

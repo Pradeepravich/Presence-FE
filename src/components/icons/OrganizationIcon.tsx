@@ -1,0 +1,33 @@
+import { useTheme } from "@mui/material";
+
+const OrganizationIcon = () => {
+  const theme = useTheme();
+  return (
+    <svg
+      width="12"
+      height="13"
+      viewBox="0 0 12 13"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <g clipPath="url(#clip0_9575_7827)">
+        <path
+          d="M11 9V8.5C11 7.12 9.88 6 8.5 6H6.5V4C7.05 4 7.5 3.55 7.5 3V2C7.5 1.45 7.05 1 6.5 1H5.5C4.95 1 4.5 1.45 4.5 2V3C4.5 3.55 4.95 4 5.5 4V6H3.5C2.12 6 1 7.12 1 8.5V9C0.45 9 0 9.45 0 10V11C0 11.55 0.45 12 1 12H2C2.55 12 3 11.55 3 11V10C3 9.45 2.55 9 2 9V8.5C2 7.675 2.675 7 3.5 7H5.5V9C4.95 9 4.5 9.45 4.5 10V11C4.5 11.55 4.95 12 5.5 12H6.5C7.05 12 7.5 11.55 7.5 11V10C7.5 9.45 7.05 9 6.5 9V7H8.5C9.325 7 10 7.675 10 8.5V9C9.45 9 9 9.45 9 10V11C9 11.55 9.45 12 10 12H11C11.55 12 12 11.55 12 11V10C12 9.45 11.55 9 11 9ZM5.5 2H6.5V3H5.5V2ZM2 11H1V10H2V11ZM6.5 11H5.5V10H6.5V11ZM11 11H10V10H11V11Z"
+          fill={theme.palette.mode === "light" ? "#263238" : "#EEEEEECC"}
+        />
+      </g>
+      <defs>
+        <clipPath id="clip0_9575_7827">
+          <rect
+            width="12"
+            height="12"
+            fill="white"
+            transform="translate(0 0.5)"
+          />
+        </clipPath>
+      </defs>
+    </svg>
+  );
+};
+
+export default OrganizationIcon;
