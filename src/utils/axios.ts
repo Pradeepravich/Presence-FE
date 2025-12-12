@@ -84,8 +84,11 @@ axiosInstance.interceptors.response.use(
 
     if (!axios.isCancel(error)) {
       console.log(error);
-      // @ts-expect-error - AxiosError message type issue
-      await errorLogger.logError(error.message, "unhandled");
+      const msg =
+        typeof error.message === "string"
+          ? error.message
+          : "Unknown Axios error";
+      await errorLogger.logError(msg, "unhandled");
     }
 
     // Check for 401 error
